@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Densifi | Edge Vision & Retail Telemetry Suite</title>
+  <!-- Google Fonts & Tailwind CSS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: {
+            densifi: {
+              dark: '#090D16',        /* Obsidian Dark (Primary 60%) */
+              emerald: '#10B981',     /* Computer Vision Emerald (Accent 30%) */
+              emeraldlight: '#ECFDF5',/* Soft Emerald Tint */
+              amber: '#F59E0B',       /* Diagnostic Amber (Highlight 10%) */
+              bg: '#F4F6F8'          /* Clean Industrial Gray Background */
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F4F6F8; }
+    .obsidian-gradient { background: linear-gradient(135deg, #090D16 0%, #1E293B 100%); }
+    .emerald-gradient { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+  </style>
+</head>
+<body class="text-slate-800 antialiased h-screen w-screen overflow-hidden flex relative bg-[#F4F6F8]">
+
+  <!-- ================= STAFF LOGIN SCREEN ================= -->
+  <div id="login-screen" class="fixed inset-0 z-50 obsidian-gradient flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border border-slate-700/30 text-center relative overflow-hidden">
+      <!-- Ambient Vision Glow -->
+      <div class="absolute -top-12 -right-12 w-32 h-32 bg-densifi-emerald/20 rounded-full blur-2xl"></div>
+
+      <!-- Densifi Brand Logo (Option C: High-Tech Edge Vision) -->
+      <div class="flex flex-col items-center justify-center mb-6">
+        <div class="w-16 h-16 bg-densifi-dark text-densifi-emerald rounded-2xl flex items-center justify-center shadow-lg mb-3 border border-densifi-emerald/30">
+          <svg class="w-10 h-10 stroke-current" viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </div>
+        <h1 class="text-3xl font-extrabold tracking-wider text-densifi-dark uppercase">DENSIFI</h1>
+        <p class="text-xs text-slate-500 font-medium tracking-wide mt-1">Edge Hardware & Store Telemetry Suite</p>
+      </div>
+
+      <!-- Login Form -->
+      <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Staff ID / Username</label>
+          <input type="text" id="login-user" required value="densifi_admin" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-densifi-emerald focus:outline-none bg-slate-50">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+          <input type="password" id="login-pass" required value="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-densifi-emerald focus:outline-none bg-slate-50">
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-densifi-dark hover:bg-slate-800 text-densifi-emerald font-bold rounded-xl text-xs uppercase tracking-wider transition shadow-md border border-densifi-emerald/30 mt-2">
+          Secure Node Access Sign In
+        </button>
+      </form>
+
+      <div class="mt-6 pt-4 border-t border-slate-100 text-[11px] text-slate-400">
+        Restricted Access. Authorized Densifi Edge Gateways Only.
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DASHBOARD APP MAIN WRAPPER ================= -->
+  <div id="app-wrapper" class="hidden flex-1 flex w-full h-full overflow-hidden">
+
+    <!-- LEFT SIDEBAR NAVIGATION -->
+    <aside class="w-64 bg-densifi-dark text-slate-100 flex flex-col shrink-0 h-full border-r border-slate-800 shadow-xl overflow-y-auto">
+      
+      <!-- Densifi Brand Header -->
+      <div class="h-20 flex items-center px-6 border-b border-slate-800 gap-3 shrink-0">
+        <div class="bg-slate-900 text-densifi-emerald p-2 rounded-xl shadow-md border border-densifi-emerald/40">
+          <svg class="w-6 h-6 stroke-current" viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-white text-lg tracking-widest leading-none uppercase">DENSIFI</h1>
+          <p class="text-[10px] text-densifi-emerald font-medium mt-1 tracking-wider uppercase">Edge Vision Platform</p>
+        </div>
+      </div>
+
+      <!-- Navigation Menu Items -->
+      <nav class="flex-1 p-4 space-y-1.5 text-xs font-semibold">
+        <div class="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Main Navigation</div>
+        
+        <button onclick="navigateTo('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-white bg-densifi-emerald font-bold shadow-sm transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+          Overview Dashboard
+        </button>
+
+        <button onclick="navigateTo('camera')" id="nav-camera" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          Live Doorway Stream
+        </button>
+
+        <button onclick="navigateTo('logs')" id="nav-logs" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Audit Snapshot Logs
+        </button>
+
+        <button onclick="navigateTo('analytics')" id="nav-analytics" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          Analytics & Insights
+        </button>
+
+        <div class="px-3 pt-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">System & Hardware</div>
+
+        <button onclick="navigateTo('hardware')" id="nav-hardware" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
+          Hardware & PIR Sensor
+        </button>
+
+        <button onclick="navigateTo('errors')" id="nav-errors" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          System Fault & Error Logs
+        </button>
+      </nav>
+
+      <!-- Active Staff Profile Section -->
+      <div class="p-4 border-t border-slate-800 bg-black/40 text-xs shrink-0">
+        <div class="flex items-center justify-between">
+          <div>
+            <p id="active-staff-name" class="font-bold text-white">Admin: densifi_admin</p>
+            <p id="active-staff-branch" class="text-[10px] text-densifi-emerald mt-0.5">Densifi Klang Node</p>
+          </div>
+          <button onclick="logout()" class="text-[10px] bg-slate-800 hover:bg-slate-700 border border-slate-700 px-2.5 py-1 rounded-lg text-slate-200 font-semibold transition">
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+
+      <!-- TOP HEADER BAR WITH GLOBAL BRANCH FILTER -->
+      <header class="bg-white border-b border-slate-200 h-20 flex items-center justify-between px-8 shrink-0 z-20 shadow-sm">
+        <div class="flex items-center gap-6">
+          <h2 id="page-title" class="text-xl font-bold text-slate-900">Overview Dashboard</h2>
+          
+          <!-- Store Selection Dropdown -->
+          <div class="flex items-center gap-2 border-l border-slate-200 pl-6">
+            <label for="store-filter" class="text-xs font-bold text-densifi-emerald uppercase tracking-wider">Outlet Branch:</label>
+            <select id="store-filter" onchange="filterStoreData(this.value)" class="bg-slate-100 border border-slate-300 text-slate-900 text-xs rounded-xl p-2 font-bold focus:ring-2 focus:ring-densifi-emerald shadow-sm cursor-pointer">
+              <option value="ALL">🛍️ All Outlets Combined (Densifi Total)</option>
+              <option value="STORE_KLANG" selected>📍 Densifi Klang</option>
+              <option value="STORE_BRICKFIELDS">📍 Densifi Brickfields</option>
+              <option value="STORE_1UTAMA">📍 Densifi 1 Utama</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE CONTENTS (SCROLLABLE CONTAINER) -->
+      <main class="p-8 flex-1 overflow-y-auto min-h-0">
+
+        <!-- ================= PAGE 1: OVERVIEW DASHBOARD ================= -->
+        <section id="page-dashboard" class="page-content space-y-6">
+          
+          <!-- Executive KPI Bar -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:border-densifi-emerald transition" onclick="openStoreDetails(selectedStore)">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Branch Footfall Today</span>
+              <div class="mt-2 flex items-baseline justify-between">
+                <span id="dash-total" class="text-3xl font-extrabold text-slate-900">142</span>
+                <span id="dash-total-badge" class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">Active Node</span>
+              </div>
+              <p class="text-[10px] text-densifi-emerald font-semibold mt-2">🔍 Click to inspect node diagnostics</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:border-densifi-emerald transition" onclick="openStoreDetails(selectedStore)">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Current Boutique Occupancy</span>
+              <div class="mt-2 flex items-baseline justify-between">
+                <span id="dash-occupancy" class="text-3xl font-extrabold text-emerald-600">18</span>
+                <span id="dash-max-label" class="text-xs font-semibold text-slate-500">Capacity: 50</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2 mt-3 overflow-hidden">
+                <div id="dash-occupancy-bar" class="bg-densifi-emerald h-2 rounded-full transition-all duration-300" style="width: 36%;"></div>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Company Total (3 Outlets)</span>
+              <div class="mt-2 flex items-baseline justify-between">
+                <span id="dash-company-total" class="text-3xl font-extrabold text-slate-900">388</span>
+                <span class="text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">Active Stream</span>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Top Performing Branch</span>
+              <div class="mt-2 flex items-baseline justify-between">
+                <span class="text-xl font-extrabold text-densifi-dark">Densifi Klang</span>
+                <span class="text-xs font-bold text-emerald-600">142 visits</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Store-by-Store Real-Time Comparison Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Store Card 1 -->
+            <div id="card-STORE_KLANG" class="bg-white p-5 rounded-2xl border-2 border-densifi-emerald shadow-sm space-y-3 cursor-pointer hover:bg-emerald-50/30 transition" onclick="openStoreDetails('STORE_KLANG')">
+              <div class="flex justify-between items-center">
+                <h4 class="font-bold text-slate-900 text-sm">📍 Densifi Klang</h4>
+                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md">ONLINE</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-100">
+                <div><span class="text-slate-400">Today Count:</span> <strong id="card-s1-total" class="block text-base text-slate-900 font-extrabold">142</strong></div>
+                <div><span class="text-slate-400">Occupancy:</span> <strong id="card-s1-occ" class="block text-base text-emerald-600 font-extrabold">18</strong></div>
+              </div>
+              <div class="text-[11px] text-densifi-emerald font-bold flex items-center justify-between pt-1">
+                <span>View Node Telemetry</span>
+                <span>→</span>
+              </div>
+            </div>
+
+            <!-- Store Card 2 -->
+            <div id="card-STORE_BRICKFIELDS" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 cursor-pointer hover:bg-slate-50 transition" onclick="openStoreDetails('STORE_BRICKFIELDS')">
+              <div class="flex justify-between items-center">
+                <h4 class="font-bold text-slate-900 text-sm">📍 Densifi Brickfields</h4>
+                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md">ONLINE</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-100">
+                <div><span class="text-slate-400">Today Count:</span> <strong class="block text-base text-slate-900 font-extrabold">118</strong></div>
+                <div><span class="text-slate-400">Occupancy:</span> <strong class="block text-base text-emerald-600 font-extrabold">12</strong></div>
+              </div>
+              <div class="text-[11px] text-densifi-emerald font-bold flex items-center justify-between pt-1">
+                <span>View Node Telemetry</span>
+                <span>→</span>
+              </div>
+            </div>
+
+            <!-- Store Card 3 -->
+            <div id="card-STORE_1UTAMA" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 cursor-pointer hover:bg-slate-50 transition" onclick="openStoreDetails('STORE_1UTAMA')">
+              <div class="flex justify-between items-center">
+                <h4 class="font-bold text-slate-900 text-sm">📍 Densifi 1 Utama</h4>
+                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md">ONLINE</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-100">
+                <div><span class="text-slate-400">Today Count:</span> <strong class="block text-base text-slate-900 font-extrabold">128</strong></div>
+                <div><span class="text-slate-400">Occupancy:</span> <strong class="block text-base text-emerald-600 font-extrabold">15</strong></div>
+              </div>
+              <div class="text-[11px] text-densifi-emerald font-bold flex items-center justify-between pt-1">
+                <span>View Node Telemetry</span>
+                <span>→</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dual Comparative Data Visualization Section -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+              <h3 class="text-sm font-bold text-slate-900">Hourly Customer Flow Comparison</h3>
+              <div class="relative h-64 w-full">
+                <canvas id="dashChart"></canvas>
+              </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between">
+              <h3 class="text-sm font-bold text-slate-900">Footfall Distribution Share</h3>
+              <div class="relative h-52 w-full flex items-center justify-center">
+                <canvas id="shareChart"></canvas>
+              </div>
+              <div class="text-[11px] text-slate-500 font-medium text-center">Densifi Klang leads overall entries (36.6%)</div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ================= PAGE 2: LIVE CAMERA STREAM ================= -->
+        <section id="page-camera" class="page-content hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex justify-between items-center">
+              <div>
+                <h3 class="text-base font-bold text-slate-900">Boutique Entrance Overhead Camera</h3>
+                <p class="text-xs text-slate-500">Densifi Edge Vision Node - Active Counter Tripwire</p>
+              </div>
+              <span class="text-xs font-mono bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-lg font-bold">1080p @ 30FPS</span>
+            </div>
+
+            <div class="relative bg-slate-950 rounded-2xl overflow-hidden h-[420px] flex items-center justify-center border-2 border-densifi-emerald/30">
+              <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover opacity-80" alt="Densifi Store Feed">
+              
+              <div class="absolute inset-x-0 top-1/2 border-b-2 border-dashed border-densifi-emerald"></div>
+              <div class="absolute top-4 left-4 bg-black/80 text-densifi-emerald text-xs px-3 py-1.5 rounded-lg font-mono font-bold border border-densifi-emerald/40">
+                TRIPWIRE_STATUS: ACTIVE (ENTRY_LINE_Y = 240px)
+              </div>
+
+              <div id="cam-detection-box" class="hidden absolute top-1/3 left-1/2 -translate-x-1/2 w-32 h-40 border-2 border-emerald-400 bg-emerald-500/20 rounded-xl flex items-start p-1">
+                <span class="bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">CUSTOMER DETECTED</span>
+              </div>
+            </div>
+
+            <div class="flex justify-between items-center text-xs text-slate-500 pt-2">
+              <span>PIR Motion Detector: GPIO Pin 17</span>
+              <button onclick="alert('Audit frame captured successfully.')" class="text-densifi-emerald font-bold hover:underline">Manual Audit Frame Snapshot</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 3: AUDIT SNAPSHOT LOGS ================= -->
+        <section id="page-logs" class="page-content hidden space-y-6">
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <div>
+                <h3 class="text-base font-bold text-slate-900">Customer Entry Snapshot Audit Logs</h3>
+                <p class="text-xs text-slate-500">Click any record row to inspect full verification snapshot and details</p>
+              </div>
+              <button onclick="exportCSV()" class="bg-densifi-dark hover:bg-slate-800 text-densifi-emerald border border-densifi-emerald/30 px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm">Export Audit CSV</button>
+            </div>
+
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-100">
+                <tr>
+                  <th class="px-6 py-3.5">Event ID</th>
+                  <th class="px-6 py-3.5">Boutique Branch</th>
+                  <th class="px-6 py-3.5">Timestamp</th>
+                  <th class="px-6 py-3.5">Snapshot</th>
+                  <th class="px-6 py-3.5">Sensor Input</th>
+                  <th class="px-6 py-3.5">Action</th>
+                </tr>
+              </thead>
+              <tbody id="logs-table-body" class="divide-y divide-slate-100">
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 4: ANALYTICS & REPORTS ================= -->
+        <section id="page-analytics" class="page-content hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+            
+            <!-- Header Bar & Timestamp Display -->
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h3 class="text-base font-bold text-slate-900">Historical Footfall Analytics</h3>
+                <p id="analytics-subtitle" class="text-xs text-slate-500 mt-0.5">Weekly customer trends across Densifi locations</p>
+              </div>
+              
+              <!-- Real-time Timestamp & Date Info Badge -->
+              <div class="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 text-xs font-semibold text-slate-700">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Report Interval: <strong id="analytics-timestamp" class="font-mono text-slate-900">2026-10-01 to 2026-10-09</strong></span>
+              </div>
+            </div>
+
+            <!-- Analytics Option Toolbar -->
+            <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              
+              <!-- Option Mode Buttons (Daily, Weekly, Monthly, Yearly) -->
+              <div class="flex items-center gap-1 bg-slate-200 p-1 rounded-xl text-xs font-bold">
+                <button onclick="setAnalyticsMode('daily')" id="btn-mode-daily" class="analytics-mode-btn px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">Daily</button>
+                <button onclick="setAnalyticsMode('weekly')" id="btn-mode-weekly" class="analytics-mode-btn px-3 py-1.5 rounded-lg transition bg-densifi-emerald text-white shadow-sm">Weekly</button>
+                <button onclick="setAnalyticsMode('monthly')" id="btn-mode-monthly" class="analytics-mode-btn px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">Monthly</button>
+                <button onclick="setAnalyticsMode('yearly')" id="btn-mode-yearly" class="analytics-mode-btn px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">Yearly</button>
+              </div>
+
+              <!-- Date Selection Inputs -->
+              <div class="flex flex-wrap items-center gap-3 text-xs font-medium">
+                <div class="flex items-center gap-1.5">
+                  <label for="analytics-start-date" class="font-bold text-slate-600">From:</label>
+                  <input type="date" id="analytics-start-date" value="2026-10-01" onchange="handleDateChange()" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-densifi-emerald focus:outline-none cursor-pointer">
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <label for="analytics-end-date" class="font-bold text-slate-600">To:</label>
+                  <input type="date" id="analytics-end-date" value="2026-10-09" onchange="handleDateChange()" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-densifi-emerald focus:outline-none cursor-pointer">
+                </div>
+                <button onclick="resetAnalyticsDates()" class="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg transition">All Dates</button>
+              </div>
+
+            </div>
+
+            <!-- Graph Canvas Container -->
+            <div class="relative h-80 w-full">
+              <canvas id="analyticsChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 5: HARDWARE TELEMETRY & SETTINGS ================= -->
+        <section id="page-hardware" class="page-content hidden space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <h3 class="text-base font-bold text-slate-900">PIR Sensor Configuration</h3>
+              <div>
+                <label class="text-xs font-bold text-slate-700">PIR Debounce Buffer (Seconds)</label>
+                <input type="range" min="0.5" max="5.0" step="0.5" value="1.5" class="w-full mt-2 accent-densifi-emerald" oninput="document.getElementById('debounce-label').innerText = this.value + 's'">
+                <span id="debounce-label" class="text-xs text-densifi-emerald font-bold">1.5s</span>
+              </div>
+              <div>
+                <label class="text-xs font-bold text-slate-700">Max Room Capacity Limit</label>
+                <input type="number" value="50" class="mt-1 w-full border border-slate-300 rounded-xl p-2.5 text-xs font-bold">
+              </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+              <h3 class="text-base font-bold text-slate-900">Densifi Edge Node Telemetry</h3>
+              <div class="flex justify-between text-xs py-2 border-b border-slate-100">
+                <span class="text-slate-500">CPU Temperature:</span>
+                <span class="font-mono text-emerald-600 font-bold">41.2 °C</span>
+              </div>
+              <div class="flex justify-between text-xs py-2 border-b border-slate-100">
+                <span class="text-slate-500">RAM Allocation:</span>
+                <span class="font-mono text-slate-800">362 MB / 1024 MB</span>
+              </div>
+              <div class="flex justify-between text-xs py-2 border-b border-slate-100">
+                <span class="text-slate-500">GPIO Pin Listener:</span>
+                <span class="font-mono text-slate-800">Pin 17 (ACTIVE)</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 6: SYSTEM FAULT & ERROR LOGS ================= -->
+        <section id="page-errors" class="page-content hidden space-y-6">
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-amber-50/40">
+              <div>
+                <h3 class="text-base font-bold text-slate-900">System Fault Diagnostic Log</h3>
+                <p class="text-xs text-slate-500">Click any error entry to open details and troubleshooting guide</p>
+              </div>
+              <button onclick="clearErrors()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition">Clear Logs</button>
+            </div>
+
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-100">
+                <tr>
+                  <th class="px-6 py-3.5">Time</th>
+                  <th class="px-6 py-3.5">Category</th>
+                  <th class="px-6 py-3.5">Fault Description</th>
+                  <th class="px-6 py-3.5">Severity</th>
+                  <th class="px-6 py-3.5">Action</th>
+                </tr>
+              </thead>
+              <tbody id="errors-table-body" class="divide-y divide-slate-100 font-mono">
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ================= INTERACTIVE INSPECTION MODAL DRAWER ================= -->
+  <div id="details-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden border border-slate-200">
+      
+      <!-- Modal Header -->
+      <div id="modal-header-bg" class="bg-densifi-dark text-white p-6 flex justify-between items-start border-b border-slate-800">
+        <div>
+          <span id="modal-badge" class="text-[10px] uppercase font-extrabold tracking-wider px-2.5 py-1 rounded-md bg-densifi-emerald text-slate-950">DENSIFI INSPECTOR</span>
+          <h3 id="modal-title" class="text-lg font-bold mt-2">Inspection Details</h3>
+          <p id="modal-subtitle" class="text-xs text-slate-400 mt-0.5">Reference ID: #SYS-8821</p>
+        </div>
+        <button onclick="closeModal()" class="text-white/70 hover:text-white p-1 rounded-lg bg-black/20">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Modal Body Content -->
+      <div id="modal-body" class="p-6 space-y-4 text-xs text-slate-600 max-h-[70vh] overflow-y-auto">
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+        <button onclick="closeModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-xl font-bold text-xs transition">Close</button>
+        <button id="modal-primary-btn" onclick="modalPrimaryAction()" class="bg-densifi-dark hover:bg-slate-800 text-densifi-emerald border border-densifi-emerald/40 px-4 py-2 rounded-xl font-bold text-xs transition shadow-sm">Execute Action</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- APPLICATION LOGIC ENGINE -->
+  <script>
+    // Densifi Outlets Store Metrics Data
+    const storeMetrics = {
+      STORE_KLANG: { name: 'Densifi Klang', total: 142, occupancy: 18, max: 50, ip: '192.168.1.101', temp: '41.2°C', hourly: [12, 19, 28, 35, 22, 18, 14, 8] },
+      STORE_BRICKFIELDS: { name: 'Densifi Brickfields', total: 118, occupancy: 12, max: 40, ip: '192.168.1.102', temp: '43.8°C', hourly: [8, 14, 20, 29, 18, 15, 10, 4] },
+      STORE_1UTAMA: { name: 'Densifi 1 Utama', total: 128, occupancy: 15, max: 60, ip: '192.168.1.103', temp: '39.5°C', hourly: [10, 16, 24, 30, 20, 16, 8, 4] }
+    };
+
+    let selectedStore = 'STORE_KLANG';
+
+    const logData = [
+      { id: 'EVT-1094', store: 'Densifi Klang', time: '16:32:05', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80', sensor: 'PIR GPIO 17' },
+      { id: 'EVT-1093', store: 'Densifi Brickfields', time: '16:28:12', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80', sensor: 'PIR GPIO 17' },
+      { id: 'EVT-1092', store: 'Densifi 1 Utama', time: '16:15:44', img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80', sensor: 'PIR GPIO 17' }
+    ];
+
+    const errorLogs = [
+      { id: 'ERR-501', time: '16:20:11', category: 'Hardware / Sensor', problem: 'Camera capture timeout on CSI Port 0', severity: 'HIGH', action: 'Check CSI ribbon cable & power supply', detail: 'V4L2 driver reported buffer underflow. Raspberry Pi camera module failed to stream frame within 2000ms.' },
+      { id: 'ERR-302', time: '15:45:02', category: 'Network / Connectivity', problem: 'WebSocket client connection dropped abruptly', severity: 'MEDIUM', action: 'Re-establish socket pipeline', detail: 'Heartbeat ping missed for 3 consecutive intervals. Node socket disconnected.' },
+      { id: 'ERR-108', time: '14:10:33', category: 'Storage & DB', problem: 'Disk write delay > 500ms on /var/app/media', severity: 'LOW', action: 'Flush SQLite cache buffer', detail: 'High I/O latency detected during audit snapshot saving.' }
+    ];
+
+    let dashChartInstance = null;
+    let shareChartInstance = null;
+    let analyticsChartInstance = null;
+    let currentAnalyticsMode = 'weekly';
+
+    const analyticsDatasets = {
+      daily: {
+        labels: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'],
+        data: [8, 24, 48, 52, 68, 74, 45, 19],
+        label: 'Daily Hourly Footfall Count',
+        subtitle: '24-hour detailed customer traffic breakdown for selected date'
+      },
+      weekly: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        data: [140, 180, 210, 190, 290, 340, 310],
+        label: 'Weekly Day-by-Day Footfall Count',
+        subtitle: 'Weekly customer trends and peak traffic days across Densifi locations'
+      },
+      monthly: {
+        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        data: [1250, 1420, 1680, 1590],
+        label: 'Monthly Week-by-Week Footfall Count',
+        subtitle: 'Monthly footfall distribution breakdown by operating week'
+      },
+      yearly: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        data: [4200, 3900, 4800, 5100, 5600, 5200, 6100, 5900, 6400, 6800, 7200, 8100],
+        label: 'Yearly Month-by-Month Footfall Count',
+        subtitle: 'Year-over-year annual footfall performance and seasonal trend overview'
+      }
+    };
+
+    // LOGIN SYSTEM
+    function handleLogin(e) {
+      e.preventDefault();
+      const user = document.getElementById('login-user').value;
+
+      selectedStore = document.getElementById('store-filter').value || 'STORE_KLANG';
+      
+      document.getElementById('active-staff-name').innerText = `Admin: ${user}`;
+      document.getElementById('active-staff-branch').innerText = storeMetrics[selectedStore]?.name || 'Densifi Klang Node';
+
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('app-wrapper').classList.remove('hidden');
+
+      initCharts();
+      renderLogs();
+      renderErrors();
+      updateDashboardUI();
+    }
+
+    function logout() {
+      document.getElementById('app-wrapper').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+    }
+
+    // NAVIGATION SYSTEM
+    function navigateTo(pageId) {
+      const pageTitles = {
+        dashboard: 'Overview Dashboard',
+        camera: 'Live Doorway Stream',
+        logs: 'Audit Snapshot Logs',
+        analytics: 'Analytics & Insights',
+        hardware: 'Hardware Telemetry & PIR',
+        errors: 'System Fault & Error Logs'
+      };
+
+      document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`page-${pageId}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.classList.remove('bg-densifi-emerald', 'text-white', 'font-bold');
+        btn.classList.add('text-slate-400', 'hover:bg-slate-800');
+      });
+
+      const activeNav = document.getElementById(`nav-${pageId}`);
+      if (activeNav) {
+        activeNav.classList.add('bg-densifi-emerald', 'text-white', 'font-bold');
+        activeNav.classList.remove('text-slate-400');
+      }
+
+      document.getElementById('page-title').innerText = pageTitles[pageId] || 'Dashboard';
+
+      if (pageId === 'camera') {
+        setTimeout(() => {
+          document.getElementById('cam-detection-box').classList.remove('hidden');
+        }, 600);
+      } else {
+        document.getElementById('cam-detection-box').classList.add('hidden');
+      }
+    }
+
+    // FILTER & METRICS UPDATE
+    function filterStoreData(storeKey) {
+      selectedStore = storeKey;
+      updateDashboardUI();
+    }
+
+    function updateDashboardUI() {
+      if (selectedStore === 'ALL') {
+        const total = storeMetrics.STORE_KLANG.total + storeMetrics.STORE_BRICKFIELDS.total + storeMetrics.STORE_1UTAMA.total;
+        const occ = storeMetrics.STORE_KLANG.occupancy + storeMetrics.STORE_BRICKFIELDS.occupancy + storeMetrics.STORE_1UTAMA.occupancy;
+        
+        document.getElementById('dash-total').innerText = total;
+        document.getElementById('dash-occupancy').innerText = occ;
+        document.getElementById('dash-max-label').innerText = 'Capacity: 150 Total';
+        document.getElementById('dash-occupancy-bar').style.width = `${Math.min((occ / 150) * 100, 100)}%`;
+      } else {
+        const store = storeMetrics[selectedStore];
+        document.getElementById('dash-total').innerText = store.total;
+        document.getElementById('dash-occupancy').innerText = store.occupancy;
+        document.getElementById('dash-max-label').innerText = `Capacity: ${store.max}`;
+        document.getElementById('dash-occupancy-bar').style.width = `${Math.min((store.occupancy / store.max) * 100, 100)}%`;
+      }
+
+      updateCharts();
+    }
+
+    // CHART.JS INITIALIZATION (OPTION C HIGH-TECH COLOR PALETTE)
+    function initCharts() {
+      const ctxDash = document.getElementById('dashChart').getContext('2d');
+      dashChartInstance = new Chart(ctxDash, {
+        type: 'bar',
+        data: {
+          labels: ['9AM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM'],
+          datasets: [{
+            label: 'Hourly Visitors',
+            data: storeMetrics.STORE_KLANG.hourly,
+            backgroundColor: '#10B981',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true }, x: { grid: { display: false } } }
+        }
+      });
+
+      const ctxShare = document.getElementById('shareChart').getContext('2d');
+      shareChartInstance = new Chart(ctxShare, {
+        type: 'doughnut',
+        data: {
+          labels: ['Densifi Klang', 'Densifi Brickfields', 'Densifi 1 Utama'],
+          datasets: [{
+            data: [142, 118, 128],
+            backgroundColor: ['#10B981', '#F59E0B', '#090D16'],
+            borderWidth: 2,
+            borderColor: '#FFFFFF'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } },
+          cutout: '65%'
+        }
+      });
+
+      const ctxAnalytics = document.getElementById('analyticsChart').getContext('2d');
+      analyticsChartInstance = new Chart(ctxAnalytics, {
+        type: 'line',
+        data: {
+          labels: analyticsDatasets.weekly.labels,
+          datasets: [{
+            label: analyticsDatasets.weekly.label,
+            data: analyticsDatasets.weekly.data,
+            borderColor: '#10B981',
+            backgroundColor: 'rgba(16, 185, 129, 0.12)',
+            fill: true,
+            tension: 0.35,
+            borderWidth: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: true } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    function updateCharts() {
+      if (!dashChartInstance) return;
+
+      if (selectedStore === 'ALL') {
+        const combined = storeMetrics.STORE_KLANG.hourly.map((v, i) => v + storeMetrics.STORE_BRICKFIELDS.hourly[i] + storeMetrics.STORE_1UTAMA.hourly[i]);
+        dashChartInstance.data.datasets[0].data = combined;
+      } else {
+        dashChartInstance.data.datasets[0].data = storeMetrics[selectedStore].hourly;
+      }
+      dashChartInstance.update();
+    }
+
+    // ANALYTICS MODE SWITCHER
+    function setAnalyticsMode(mode) {
+      currentAnalyticsMode = mode;
+
+      document.querySelectorAll('.analytics-mode-btn').forEach(btn => {
+        btn.classList.remove('bg-densifi-emerald', 'text-white', 'shadow-sm');
+        btn.classList.add('text-slate-600', 'hover:text-slate-900');
+      });
+
+      const activeBtn = document.getElementById(`btn-mode-${mode}`);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-densifi-emerald', 'text-white', 'shadow-sm');
+        activeBtn.classList.remove('text-slate-600', 'hover:text-slate-900');
+      }
+
+      const config = analyticsDatasets[mode];
+      if (analyticsChartInstance && config) {
+        analyticsChartInstance.data.labels = config.labels;
+        analyticsChartInstance.data.datasets[0].label = config.label;
+        analyticsChartInstance.data.datasets[0].data = config.data;
+        analyticsChartInstance.update();
+
+        document.getElementById('analytics-subtitle').innerText = config.subtitle;
+      }
+    }
+
+    function handleDateChange() {
+      const start = document.getElementById('analytics-start-date').value;
+      const end = document.getElementById('analytics-end-date').value;
+      document.getElementById('analytics-timestamp').innerText = `${start} to ${end}`;
+      
+      if (analyticsChartInstance) {
+        const baseData = analyticsDatasets[currentAnalyticsMode].data;
+        const adjustedData = baseData.map(val => Math.round(val * (0.88 + Math.random() * 0.25)));
+        analyticsChartInstance.data.datasets[0].data = adjustedData;
+        analyticsChartInstance.update();
+      }
+    }
+
+    function resetAnalyticsDates() {
+      document.getElementById('analytics-start-date').value = '2026-01-01';
+      document.getElementById('analytics-end-date').value = '2026-10-09';
+      document.getElementById('analytics-timestamp').innerText = 'All Dates (2026-01-01 to 2026-10-09)';
+      setAnalyticsMode(currentAnalyticsMode);
+    }
+
+    // AUDIT LOGS TABLE RENDERER
+    function renderLogs() {
+      const tbody = document.getElementById('logs-table-body');
+      tbody.innerHTML = logData.map(log => `
+        <tr class="hover:bg-slate-50 cursor-pointer transition" onclick="openLogDetails('${log.id}')">
+          <td class="px-6 py-4 font-mono font-bold text-slate-900">${log.id}</td>
+          <td class="px-6 py-4 font-semibold">${log.store}</td>
+          <td class="px-6 py-4 font-mono">${log.time}</td>
+          <td class="px-6 py-4">
+            <img src="${log.img}" class="w-8 h-8 rounded-lg object-cover border border-slate-200 shadow-sm" alt="Snapshot">
+          </td>
+          <td class="px-6 py-4 font-mono text-slate-500">${log.sensor}</td>
+          <td class="px-6 py-4 font-bold text-densifi-emerald hover:underline">Inspect →</td>
+        </tr>
+      `).join('');
+    }
+
+    // ERROR LOGS TABLE RENDERER
+    function renderErrors() {
+      const tbody = document.getElementById('errors-table-body');
+      tbody.innerHTML = errorLogs.map(err => `
+        <tr class="hover:bg-amber-50/30 cursor-pointer transition" onclick="openErrorDetails('${err.id}')">
+          <td class="px-6 py-3.5 text-slate-500">${err.time}</td>
+          <td class="px-6 py-3.5 font-sans font-semibold text-slate-900">${err.category}</td>
+          <td class="px-6 py-3.5 text-amber-600 font-bold">${err.problem}</td>
+          <td class="px-6 py-3.5">
+            <span class="${err.severity === 'HIGH' ? 'bg-rose-100 text-rose-800' : err.severity === 'MEDIUM' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'} text-[9px] font-extrabold px-2 py-0.5 rounded-md">${err.severity}</span>
+          </td>
+          <td class="px-6 py-3.5 font-sans font-bold text-densifi-emerald hover:underline">Diagnose →</td>
+        </tr>
+      `).join('');
+    }
+
+    // MODAL INSPECTION DRAWER
+    function openStoreDetails(storeKey) {
+      const store = storeMetrics[storeKey] || storeMetrics.STORE_KLANG;
+      document.getElementById('modal-title').innerText = `Node Telemetry: ${store.name}`;
+      document.getElementById('modal-subtitle').innerText = `IP: ${store.ip} | Temp: ${store.temp}`;
+      document.getElementById('modal-badge').innerText = 'EDGE NODE TELEMETRY';
+      
+      document.getElementById('modal-body').innerHTML = `
+        <div class="space-y-3">
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+            <p class="font-bold text-slate-800">Hardware Gateway Status</p>
+            <p class="text-[11px] text-slate-500 mt-0.5">Raspberry Pi 4 Model B (4GB RAM) connected via Gigabit Ethernet.</p>
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div class="p-3 bg-emerald-50/50 border border-emerald-200 rounded-xl">
+              <span class="text-slate-400">Total Visits:</span>
+              <strong class="block text-lg font-bold text-slate-900 mt-0.5">${store.total}</strong>
+            </div>
+            <div class="p-3 bg-emerald-50/50 border border-emerald-200 rounded-xl">
+              <span class="text-slate-400">Occupancy:</span>
+              <strong class="block text-lg font-bold text-emerald-600 mt-0.5">${store.occupancy} / ${store.max}</strong>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modal-primary-btn').innerText = 'Reboot Node Gateway';
+      document.getElementById('details-modal').classList.remove('hidden');
+    }
+
+    function openLogDetails(id) {
+      const item = logData.find(l => l.id === id);
+      if (!item) return;
+
+      document.getElementById('modal-title').innerText = `Visitor Frame (${item.id})`;
+      document.getElementById('modal-subtitle').innerText = `${item.store} | Captured at ${item.time}`;
+      document.getElementById('modal-badge').innerText = 'AUDIT SNAPSHOT INSPECTOR';
+
+      document.getElementById('modal-body').innerHTML = `
+        <div class="space-y-3">
+          <div class="w-full h-52 bg-slate-900 rounded-xl overflow-hidden border border-slate-200 relative">
+            <img src="${item.img}" class="w-full h-full object-cover">
+            <span class="absolute bottom-2 left-2 bg-black/80 text-white font-mono text-[10px] px-2 py-1 rounded">${item.time}</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200 font-mono text-[11px]">
+            <div>Event ID: <strong>${item.id}</strong></div>
+            <div>Branch: <strong>${item.store}</strong></div>
+            <div>Source: <strong>${item.sensor}</strong></div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modal-primary-btn').innerText = 'Download High-Res Frame';
+      document.getElementById('details-modal').classList.remove('hidden');
+    }
+
+    function openErrorDetails(id) {
+      const err = errorLogs.find(e => e.id === id);
+      if (!err) return;
+
+      document.getElementById('modal-title').innerText = `Fault ID: ${err.id}`;
+      document.getElementById('modal-subtitle').innerText = `Category: ${err.category}`;
+      document.getElementById('modal-badge').innerText = 'SYSTEM FAULT INSPECTOR';
+
+      document.getElementById('modal-body').innerHTML = `
+        <div class="space-y-3">
+          <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+            <p class="font-bold text-amber-700">${err.problem}</p>
+            <p class="text-[10px] text-slate-500 mt-1">Logged at ${err.time} | Category: ${err.category}</p>
+          </div>
+          <div>
+            <p class="font-bold text-slate-800 mb-1">Root Cause Exception Detail</p>
+            <p class="font-mono bg-slate-900 text-slate-200 p-3 rounded-xl text-[11px]">${err.detail}</p>
+          </div>
+          <div>
+            <p class="font-bold text-slate-800 mb-1">Recommended Action</p>
+            <p class="bg-slate-100 border border-slate-200 p-3 rounded-xl text-slate-700 text-xs">${err.action}</p>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modal-primary-btn').innerText = 'Mark Issue Resolved';
+      document.getElementById('details-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('details-modal').classList.add('hidden');
+    }
+
+    function modalPrimaryAction() {
+      alert('Action executed successfully.');
+      closeModal();
+    }
+
+    function exportCSV() {
+      alert('Exporting footfall audit records to CSV file...');
+    }
+
+    function clearErrors() {
+      errorLogs.length = 0;
+      renderErrors();
+    }
+  </script>
+</body>
+</html>
